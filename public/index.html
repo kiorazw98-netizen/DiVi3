@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5f0">
+  <title>Stock & Sales — Shop dashboard</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#" aria-label="Stock and Sales home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 28 28" fill="none"><path d="M5 8.5 14 4l9 4.5v11L14 24l-9-4.5v-11Z" stroke="currentColor" stroke-width="1.7"/><path d="m5.5 8.7 8.5 4.4 8.5-4.4M14 13.4V23" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span>little<span class="brand-light">ledger</span></span>
+      </a>
+      <div class="workspace-label">YOUR WORKSPACE</div>
+      <nav class="navigation" aria-label="Main navigation">
+        <button class="nav-link active" data-view="overview">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="4" rx="1.6"/><rect x="13.5" y="10.5" width="7" height="10" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/></svg>
+          Overview
+        </button>
+        <button class="nav-link" data-view="inventory">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 4.5v9L12 21l-9-4.5v-9L12 3Z"/><path d="m3.5 7.7 8.5 4.4 8.5-4.4M12 12.2v8.3"/></svg>
+          Inventory <span class="nav-count" id="product-count">0</span>
+        </button>
+        <button class="nav-link" data-view="reports">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5m0 14h17"/><path d="m7 15 4-4 3 2 5-6"/></svg>
+          Reports
+        </button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="tip-card">
+          <span class="tip-icon" aria-hidden="true">✳</span>
+          <p>Small steps add up.</p>
+          <span>Keep your shop in the green.</span>
+        </div>
+        <div class="owner-profile">
+          <span class="avatar">S</span>
+          <span class="profile-copy"><strong>Shop owner</strong><span>Your business</span></span>
+          <span class="online-dot" title="App is running"></span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="breadcrumb"><span>Workspace</span><span class="crumb-slash">/</span><strong id="breadcrumb-current">Overview</strong></div>
+        <div class="topbar-actions">
+          <span class="today-label" id="today-label"></span>
+          <button class="icon-button alert-button" id="alert-button" aria-label="View low stock alerts">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
+            <span class="alert-dot" id="alert-dot" hidden></span>
+          </button>
+          <span class="top-avatar">S</span>
+        </div>
+      </header>
+
+      <div class="page-wrap">
+        <section class="view-section" id="overview-view">
+          <div class="welcome-row">
+            <div>
+              <div class="eyebrow"><span class="live-dot"></span> YOUR SHOP AT A GLANCE</div>
+              <h1>Good things are <span>growing.</span></h1>
+              <p class="page-subtitle">A little look at how your shop is doing today.</p>
+            </div>
+            <button class="button button-primary" id="record-sale-open">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              Record a sale
+            </button>
+          </div>
+
+          <div class="stats-grid">
+            <article class="stat-card">
+              <div class="stat-heading"><span>Sales today</span><span class="stat-icon green-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17.5 9 12l3.5 3.5L20 8"/><path d="M14 8h6v6"/></svg></span></div>
+              <div class="stat-value" id="today-revenue">R 0</div>
+              <div class="stat-foot"><span class="stat-indicator">↗</span><span id="today-units">0 items sold</span></div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-heading"><span>Profit today</span><span class="stat-icon lilac-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M15 9.5c-.6-.6-1.4-.9-2.5-.9-1.3 0-2.2.6-2.2 1.5 0 2.7 4.9.8 4.9 3.5 0 1-.9 1.8-2.4 1.8-1.1 0-2.1-.4-2.8-1.1M12.5 7v10"/></svg></span></div>
+              <div class="stat-value" id="today-profit">R 0</div>
+              <div class="stat-foot"><span class="stat-indicator">✳</span><span>After product costs</span></div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-heading"><span>Products in stock</span><span class="stat-icon peach-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8.5 4.3v9.4L12 21l-8.5-4.3V7.3L12 3Z"/><path d="m3.8 7.5 8.2 4.2 8.2-4.2M12 11.7V21"/></svg></span></div>
+              <div class="stat-value" id="stock-count">0</div>
+              <div class="stat-foot"><span class="stat-indicator neutral-indicator">●</span><span>Different products</span></div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-heading"><span>Needs a restock</span><span class="stat-icon yellow-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 21 20H3l9-16.5Z"/><path d="M12 9v4.5M12 17h.01"/></svg></span></div>
+              <div class="stat-value" id="low-stock-count">0</div>
+              <div class="stat-foot"><span class="stat-indicator warning-indicator">!</span><span>At or below your alert level</span></div>
+            </article>
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="panel inventory-panel">
+              <div class="panel-heading">
+                <div><h2>Stock watch</h2><p>A quick look at what’s on your shelves.</p></div>
+                <button class="text-button" data-go="inventory">All products <span>→</span></button>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead><tr><th>PRODUCT</th><th>PRICE</th><th>IN STOCK</th><th>STATUS</th></tr></thead>
+                  <tbody id="stock-watch-body"></tbody>
+                </table>
+              </div>
+              <div class="empty-state" id="empty-products">
+                <div class="empty-illustration">✳</div>
+                <strong>Your shelves are ready.</strong>
+                <span>Add your first product to start keeping track.</span>
+                <button class="button button-soft" id="first-product-open">Add a product</button>
+              </div>
+            </section>
+
+            <section class="panel low-stock-panel">
+              <div class="panel-heading">
+                <div class="heading-with-icon"><span class="heading-icon">!</span><div><h2>Restock reminders</h2><p>Products running a little low.</p></div></div>
+                <span class="soft-count" id="low-stock-pill">0</span>
+              </div>
+              <div class="reminder-list" id="low-stock-list"></div>
+              <div class="empty-reminder" id="all-good-state" hidden>
+                <span class="all-good-check">✓</span>
+                <strong>Looking good!</strong>
+                <span>Everything is above its restock level.</span>
+              </div>
+            </section>
+          </div>
+
+          <section class="panel recent-panel">
+            <div class="panel-heading">
+              <div><h2>Recent sales</h2><p>Every little win, right here.</p></div>
+              <button class="text-button" data-go="reports">See reports <span>→</span></button>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th>SALE</th><th>DATE & TIME</th><th>ITEMS</th><th>TOTAL</th><th></th></tr></thead>
+                <tbody id="recent-sales-body"></tbody>
+              </table>
+            </div>
+            <div class="empty-table" id="empty-sales" hidden>No sales just yet. Your first one will show up here.</div>
+          </section>
+        </section>
+
+        <section class="view-section" id="inventory-view" hidden>
+          <div class="welcome-row">
+            <div>
+              <div class="eyebrow"><span class="live-dot"></span> YOUR SHELVES, ORGANIZED</div>
+              <h1>A home for <span>every product.</span></h1>
+              <p class="page-subtitle">Keep an eye on prices, costs and stock, all in one place.</p>
+            </div>
+            <button class="button button-primary" id="add-product-open"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add a product</button>
+          </div>
+          <section class="panel full-panel">
+            <div class="panel-heading inventory-toolbar">
+              <div><h2>Your products <span class="heading-count" id="inventory-heading-count">0</span></h2><p>Products marked as removed stay in your past sales reports.</p></div>
+              <label class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.2 4.2"/></svg><input id="product-search" type="search" placeholder="Find a product…" aria-label="Search products"></label>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th>PRODUCT</th><th>CATEGORY</th><th>SELLING PRICE</th><th>UNIT COST</th><th>IN STOCK</th><th>STATUS</th><th></th></tr></thead>
+                <tbody id="inventory-body"></tbody>
+              </table>
+            </div>
+            <div class="empty-table" id="empty-inventory" hidden>No products match your search.</div>
+          </section>
+        </section>
+
+        <section class="view-section" id="reports-view" hidden>
+          <div class="welcome-row">
+            <div>
+              <div class="eyebrow"><span class="live-dot"></span> THE STORY BEHIND THE NUMBERS</div>
+              <h1>Your shop, <span>in perspective.</span></h1>
+              <p class="page-subtitle">A clear view of sales, costs and the profit you’ve made.</p>
+            </div>
+          </div>
+          <section class="panel report-panel">
+            <div class="report-toolbar">
+              <div><h2>Sales report</h2><p id="report-range-summary">12 October 2026 – 31 December 2026</p></div>
+              <div class="date-filters">
+                <label>FROM<input id="report-from" type="date"></label>
+                <span class="date-separator">→</span>
+                <label>TO<input id="report-to" type="date"></label>
+                <button class="button button-primary apply-report" id="apply-report">Apply</button>
+                <button class="button button-quiet print-report" id="print-report" type="button">Print report</button>
+              </div>
+            </div>
+            <div class="report-stats">
+              <div class="report-stat"><span>Sales</span><strong id="report-sales-count">0</strong></div>
+              <div class="report-stat"><span>Items sold</span><strong id="report-units">0</strong></div>
+              <div class="report-stat"><span>Revenue</span><strong id="report-revenue">R 0</strong></div>
+              <div class="report-stat"><span>Product costs</span><strong id="report-cost">R 0</strong></div>
+              <div class="report-stat report-profit"><span>Profit</span><strong id="report-profit">R 0</strong></div>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th>SALE</th><th>DATE & TIME</th><th>QUANTITY & PRODUCTS SOLD</th><th>REVENUE</th><th>COST</th><th>PROFIT</th></tr></thead>
+                <tbody id="report-body"></tbody>
+              </table>
+            </div>
+            <div class="empty-table" id="empty-report" hidden>No sales found for this date range.</div>
+            <div class="report-signature">
+              <label class="signature-input-label" for="owner-signature">Your signature</label>
+              <input id="owner-signature" class="signature-input" type="text" maxlength="100" autocomplete="name" placeholder="Type your name here">
+              <div class="signature-print">
+                <span class="signature-caption">Authorized signature</span>
+                <span id="signature-preview" class="signature-preview"></span>
+                <span class="signature-rule"></span>
+              </div>
+            </div>
+          </section>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <dialog class="app-dialog" id="product-dialog">
+    <form id="product-form">
+      <div class="dialog-heading"><div><span class="dialog-kicker">ON THE SHELVES</span><h2 id="product-dialog-title">Add a product</h2></div><button type="button" class="dialog-close" data-close="product-dialog" aria-label="Close">×</button></div>
+      <input type="hidden" name="id">
+      <label class="field-label">Product name<input name="name" maxlength="100" required placeholder="e.g. Handmade oat soap"></label>
+      <label class="field-label">Category<input name="category" maxlength="60" placeholder="e.g. Bath & body"></label>
+      <div class="field-row">
+        <label class="field-label">Selling price<input name="price" type="number" min="0" step="0.01" required placeholder="0.00"></label>
+        <label class="field-label">Unit cost<input name="cost" type="number" min="0" step="0.01" required placeholder="0.00"></label>
+      </div>
+      <div class="field-row">
+        <label class="field-label">Quantity in stock<input name="stock" type="number" min="0" step="1" required placeholder="0"></label>
+        <label class="field-label">Restock alert at<input name="lowStockThreshold" type="number" min="0" step="1" value="5" required></label>
+      </div>
+      <div class="dialog-actions"><button type="button" class="button button-quiet" data-close="product-dialog">Cancel</button><button class="button button-primary" type="submit" id="product-submit">Save product</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="app-dialog sale-dialog" id="sale-dialog">
+    <form id="sale-form">
+      <div class="dialog-heading"><div><span class="dialog-kicker">A LITTLE SHOP MOMENT</span><h2>Record a sale</h2></div><button type="button" class="dialog-close" data-close="sale-dialog" aria-label="Close">×</button></div>
+      <p class="dialog-description">Add the products sold and we’ll update your stock automatically.</p>
+      <div id="sale-lines"></div>
+      <button class="add-sale-line" id="add-sale-line" type="button"><span>＋</span> Add another product</button>
+      <div class="sale-total-row"><span>Sale total</span><strong id="sale-total">R 0</strong></div>
+      <div class="dialog-actions"><button type="button" class="button button-quiet" data-close="sale-dialog">Cancel</button><button class="button button-primary" type="submit">Save sale</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="app-dialog confirm-dialog" id="delete-dialog">
+    <div class="dialog-heading"><div><span class="dialog-kicker">JUST CHECKING</span><h2>Remove this product?</h2></div><button type="button" class="dialog-close" data-close="delete-dialog" aria-label="Close">×</button></div>
+    <p class="dialog-description" id="delete-description">It will leave your active inventory, but past sales will stay in your reports.</p>
+    <div class="dialog-actions"><button type="button" class="button button-quiet" data-close="delete-dialog">Keep product</button><button type="button" class="button button-danger" id="confirm-delete">Remove product</button></div>
+  </dialog>
+</body>
+</html>
