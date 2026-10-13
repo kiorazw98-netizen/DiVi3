@@ -4,7 +4,7 @@ A small-business inventory and sales tracker built with HTML, CSS, JavaScript, E
 
 ## Run locally
 
-1. Install Node.js 20 or newer.
+1. Install Node.js 22 or newer.
 2. In this folder, run `npm install`.
 3. Run `npm start`.
 4. Open [http://127.0.0.1:3000](http://127.0.0.1:3000).
