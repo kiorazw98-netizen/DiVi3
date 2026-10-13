@@ -137,7 +137,7 @@ function renderRecentSales(sales) {
     <tr>
       <td class="sale-id">#${sale.id.toString().padStart(4, "0")}</td>
       <td>${formatDate(sale.soldAt)} · ${formatTime(sale.soldAt)}</td>
-      <td>${sale.units} ${sale.units === 1 ? "item" : "items"}</td>
+      <td>${escapeHtml(sale.products)}</td>
       <td class="sale-total-cell">${money.format(sale.total)}</td>
       <td></td>
     </tr>`).join("");

@@ -48,6 +48,12 @@ function httpError(status, message) {
   return error;
 }
 
+function numberFromInput(value) {
+  if (typeof value === "number") return value;
+  if (typeof value === "string" && value.trim()) return Number(value);
+  return Number.NaN;
+}
+
 function validateProduct(input) {
   if (!input || typeof input !== "object" || Array.isArray(input)) {
     throw httpError(400, "Product details must be provided as an object.");
@@ -56,16 +62,30 @@ function validateProduct(input) {
   const category = typeof input.category === "string" && input.category.trim()
     ? input.category.trim()
     : "General";
-  const price = Number(input.price);
-  const cost = Number(input.cost);
-  const stock = Number(input.stock);
-  const lowStockThreshold = Number(input.lowStockThreshold ?? 5);
+  const rawPrice = numberFromInput(input.price);
+  const rawCost = numberFromInput(input.cost);
+  const price = Math.round(rawPrice * 100) / 100;
+  const cost = Math.round(rawCost * 100) / 100;
+  const stock = numberFromInput(input.stock);
+  const lowStockThreshold = input.lowStockThreshold === null || input.lowStockThreshold === undefined
+    ? 5
+    : numberFromInput(input.lowStockThreshold);
 
   if (!name || name.length > 100) throw httpError(400, "Product name must be 1–100 characters.");
-  if (!Number.isFinite(price) || price < 0) throw httpError(400, "Enter a valid selling price.");
-  if (!Number.isFinite(cost) || cost < 0) throw httpError(400, "Enter a valid unit cost.");
-  if (!Number.isInteger(stock) || stock < 0) throw httpError(400, "Stock must be a whole number of 0 or more.");
-  if (!Number.isInteger(lowStockThreshold) || lowStockThreshold < 0) {
+  if (!Number.isFinite(rawPrice) || rawPrice < 0
+    || !Number.isSafeInteger(Math.round(rawPrice * 100))
+    || Math.abs(rawPrice * 100 - Math.round(rawPrice * 100)) > 1e-8) {
+    throw httpError(400, "Enter a valid selling price with no more than two decimal places.");
+  }
+  if (!Number.isFinite(rawCost) || rawCost < 0
+    || !Number.isSafeInteger(Math.round(rawCost * 100))
+    || Math.abs(rawCost * 100 - Math.round(rawCost * 100)) > 1e-8) {
+    throw httpError(400, "Enter a valid unit cost with no more than two decimal places.");
+  }
+  if (!Number.isSafeInteger(stock) || stock < 0) {
+    throw httpError(400, "Stock must be a whole number of 0 or more.");
+  }
+  if (!Number.isSafeInteger(lowStockThreshold) || lowStockThreshold < 0) {
     throw httpError(400, "The low-stock alert level must be a whole number of 0 or more.");
   }
 
@@ -104,7 +124,8 @@ app.get("/api/dashboard", handleErrors((req, res) => {
   const recentSales = db.prepare(`
     SELECT s.id, s.sold_at AS soldAt,
       COALESCE(SUM(si.quantity * si.unit_price), 0) AS total,
-      COALESCE(SUM(si.quantity), 0) AS units
+      COALESCE(SUM(si.quantity), 0) AS units,
+      COALESCE(GROUP_CONCAT(si.quantity || ' x ' || si.product_name, ', '), '') AS products
     FROM sales s LEFT JOIN sale_items si ON si.sale_id = s.id
     GROUP BY s.id ORDER BY s.sold_at DESC, s.id DESC LIMIT 8
   `).all();
@@ -123,7 +144,7 @@ app.post("/api/products", handleErrors((req, res) => {
 
 app.put("/api/products/:id", handleErrors((req, res) => {
   const id = Number(req.params.id);
-  if (!Number.isInteger(id) || id < 1) throw httpError(400, "Invalid product.");
+  if (!Number.isSafeInteger(id) || id < 1) throw httpError(400, "Invalid product.");
   const product = validateProduct(req.body);
   const result = db.prepare(`
     UPDATE products
@@ -137,7 +158,7 @@ app.put("/api/products/:id", handleErrors((req, res) => {
 
 app.delete("/api/products/:id", handleErrors((req, res) => {
   const id = Number(req.params.id);
-  if (!Number.isInteger(id) || id < 1) throw httpError(400, "Invalid product.");
+  if (!Number.isSafeInteger(id) || id < 1) throw httpError(400, "Invalid product.");
   const result = db.prepare("UPDATE products SET active = 0 WHERE id = ? AND active = 1").run(id);
   if (!result.changes) throw httpError(404, "Product not found.");
   res.status(204).end();
@@ -153,12 +174,14 @@ app.post("/api/sales", handleErrors((req, res) => {
     if (!item || typeof item !== "object" || Array.isArray(item)) {
       throw httpError(400, "Each sale item must include a product and quantity.");
     }
-    const id = Number(item.productId);
-    const quantity = Number(item.quantity);
-    if (!Number.isInteger(id) || id < 1 || !Number.isInteger(quantity) || quantity < 1) {
+    const id = numberFromInput(item.productId);
+    const quantity = numberFromInput(item.quantity);
+    if (!Number.isSafeInteger(id) || id < 1 || !Number.isSafeInteger(quantity) || quantity < 1) {
       throw httpError(400, "Each sale needs a valid product and a whole-number quantity.");
     }
-    quantities.set(id, (quantities.get(id) || 0) + quantity);
+    const totalQuantity = (quantities.get(id) || 0) + quantity;
+    if (!Number.isSafeInteger(totalQuantity)) throw httpError(400, "A product quantity is too large.");
+    quantities.set(id, totalQuantity);
   }
 
   const recordSale = db.transaction(() => {
@@ -185,7 +208,7 @@ app.post("/api/sales", handleErrors((req, res) => {
 
     return {
       id: saleId,
-      total: selected.reduce((sum, item) => sum + item.price * item.quantity, 0),
+      total: Math.round(selected.reduce((sum, item) => sum + item.price * item.quantity, 0) * 100) / 100,
       units: selected.reduce((sum, item) => sum + item.quantity, 0)
     };
   });
@@ -197,8 +220,11 @@ app.get("/api/reports", handleErrors((req, res) => {
   const from = req.query.from;
   const to = req.query.to;
   const datePattern = /^\d{4}-\d{2}-\d{2}$/;
-  if ((from && !datePattern.test(from)) || (to && !datePattern.test(to))) {
-    throw httpError(400, "Report dates must use YYYY-MM-DD format.");
+  const isValidDate = (value) => typeof value === "string" && datePattern.test(value)
+    && !Number.isNaN(Date.parse(`${value}T00:00:00Z`))
+    && new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) === value;
+  if ((from !== undefined && !isValidDate(from)) || (to !== undefined && !isValidDate(to))) {
+    throw httpError(400, "Report dates must be valid dates in YYYY-MM-DD format.");
   }
   if (from && to && from > to) throw httpError(400, "The start date must be before the end date.");
   const where = [];
